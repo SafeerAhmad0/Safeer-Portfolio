@@ -10,25 +10,12 @@ function updateScrollProgress() {
     scrollProgress.style.width = scrolled + '%';
 }
 
-window.addEventListener('scroll', updateScrollProgress);
-
 // =====================================================
 // Floating Navigation
 // =====================================================
 const floatingNav = document.getElementById('floatingNav');
 const navItems = document.querySelectorAll('.nav-item');
 const sections = document.querySelectorAll('section[id]');
-
-// Show floating nav after scrolling past hero
-window.addEventListener('scroll', () => {
-    if (window.scrollY > window.innerHeight * 0.3) {
-        floatingNav.classList.add('visible');
-    } else {
-        floatingNav.classList.remove('visible');
-    }
-
-    updateActiveNavItem();
-});
 
 // Update active nav item based on scroll position
 function updateActiveNavItem() {
@@ -50,18 +37,26 @@ function updateActiveNavItem() {
     });
 }
 
+function updateFloatingNav() {
+    if (window.scrollY > window.innerHeight * 0.3) {
+        floatingNav.classList.add('visible');
+    } else {
+        floatingNav.classList.remove('visible');
+    }
+}
+
 // =====================================================
 // Back to Top Button
 // =====================================================
 const backToTop = document.getElementById('backToTop');
 
-window.addEventListener('scroll', () => {
+function updateBackToTop() {
     if (window.scrollY > 500) {
         backToTop.classList.add('visible');
     } else {
         backToTop.classList.remove('visible');
     }
-});
+}
 
 backToTop.addEventListener('click', () => {
     window.scrollTo({
@@ -76,10 +71,10 @@ backToTop.addEventListener('click', () => {
 const darkModeToggle = document.getElementById('darkModeToggle');
 const htmlElement = document.documentElement;
 
-// Check for saved theme preference or default to light mode
-const currentTheme = localStorage.getItem('theme') || 'light';
+// Check for saved theme preference or default to dark mode
+const currentTheme = localStorage.getItem('theme') || 'dark';
 
-// Apply the saved theme on page load
+// Apply the saved theme on page load (default is dark mode)
 if (currentTheme === 'dark') {
     document.body.classList.add('dark-mode');
 }
@@ -233,7 +228,7 @@ animateElements.forEach((el, index) => {
 const heroContent = document.querySelector('.hero-content');
 let lastScrollTop = 0;
 
-window.addEventListener('scroll', () => {
+function updateParallax() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
     // Only apply parallax when in hero section
@@ -244,7 +239,7 @@ window.addEventListener('scroll', () => {
     }
 
     lastScrollTop = scrollTop;
-});
+}
 
 // =====================================================
 // Project Card 3D Tilt Effect
@@ -328,7 +323,7 @@ document.head.appendChild(techStyle);
 const timeline = document.querySelector('.timeline');
 const timelineItems = document.querySelectorAll('.timeline-item');
 
-window.addEventListener('scroll', () => {
+function updateTimeline() {
     if (timeline) {
         const timelineRect = timeline.getBoundingClientRect();
         const windowHeight = window.innerHeight;
@@ -342,7 +337,7 @@ window.addEventListener('scroll', () => {
             }
         });
     }
-});
+}
 
 // Set initial state for timeline items
 timelineItems.forEach((item, index) => {
@@ -350,6 +345,30 @@ timelineItems.forEach((item, index) => {
     item.style.transform = 'translateX(-30px)';
     item.style.transition = `opacity 0.6s ease-out ${index * 0.15}s, transform 0.6s ease-out ${index * 0.15}s`;
 });
+
+// =====================================================
+// Optimized Scroll Handler with Throttling
+// =====================================================
+let scrollTimeout;
+let ticking = false;
+
+function handleScroll() {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            updateScrollProgress();
+            updateFloatingNav();
+            updateBackToTop();
+            updateActiveNavItem();
+            updateParallax();
+            updateTimeline();
+            ticking = false;
+        });
+        ticking = true;
+    }
+}
+
+// Single optimized scroll listener
+window.addEventListener('scroll', handleScroll, { passive: true });
 
 // =====================================================
 // Add Ripple Effect to Buttons
